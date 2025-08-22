@@ -3,6 +3,7 @@ const courseRouter = Router();
 const{coursemodel} = require("../db")
 const{purchasemodel} = require("../db")
 const { usermiddleware } =require('../middleware/user')
+const {jwt_user_secret } =require('../config')
 
 courseRouter.use(usermiddleware)
 courseRouter.post('/purchuse',async function(req, res){

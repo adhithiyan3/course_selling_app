@@ -4,7 +4,7 @@ const { usermodel } = require("../db")
 const jwt = require('jsonwebtoken')
 const { z } = require('zod');
 const bcrypt = require("bcrypt")
-
+const {jwt_user_secret } =require('../config')
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email format"),

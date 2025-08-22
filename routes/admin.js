@@ -7,6 +7,7 @@ require('dotenv').config()
 const { z } = require("zod");
 const bcrypt = require("bcrypt")
 const { adminmiddleware } = require('../middleware/admin')
+const {jwt_admin_secret } =require('../config')
 
 
 const admimsignupSchema = z.object({
@@ -76,8 +77,16 @@ adminRouter.post('/signin', async function (req, res) {
   }
 });
 
-
 adminRouter.use(adminmiddleware);
+
+adminRouter.get("/viewcourses", async function (req, res) {
+  try {
+    const courses = await coursemodel.find({});
+    res.json({ courses });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch courses", error: err.message });
+  }
+});
 adminRouter.post("/createcourse", async function (req, res) {
   const { title, description, price, imageUrl } = req.body;
   const creatorId = req.userId
@@ -97,14 +106,6 @@ adminRouter.post("/createcourse", async function (req, res) {
   }
 });
 
-adminRouter.get("/viewcourses", async function (req, res) {
-  try {
-    const courses = await coursemodel.find({});
-    res.json({ courses });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch courses", error: err.message });
-  }
-});
 
 
 adminRouter.put("/modifycourse/:id", async function (req, res) {
