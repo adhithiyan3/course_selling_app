@@ -2,11 +2,13 @@ const { Router } = require('express');
 const courseRouter = Router();
 const{coursemodel} = require("../db")
 const{purchasemodel} = require("../db")
+const { usermiddleware } =require('../middleware/user')
 
-
+courseRouter.use(usermiddleware)
 courseRouter.post('/purchuse',async function(req, res){
    try {
-    const { userId, courseId } = req.body;
+    const { courseId } = req.body;
+    const  userId = req.userId;
 
     const purchase = await purchasemodel.create({ userId, courseId });
 

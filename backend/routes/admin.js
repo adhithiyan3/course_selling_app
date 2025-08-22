@@ -1,15 +1,16 @@
 const { Router } = require('express');
 const adminRouter = Router();
-const{adminmodel} = require("../db")
+const { adminmodel } = require("../db")
 const { coursemodel } = require("../db");
 const jwt = require('jsonwebtoken')
-const jwt_secret = "aadhi161004"
+require('dotenv').config()
 const { z } = require("zod");
 const bcrypt = require("bcrypt")
+const { adminmiddleware } = require('../middleware/admin')
 
 
 const admimsignupSchema = z.object({
-   email: z.string().email("Invalid email format"),
+  email: z.string().email("Invalid email format"),
   password: z.string()
     .min(8, "Password must be at least 8 characters")
     .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
@@ -22,30 +23,30 @@ const admimsignupSchema = z.object({
 
 adminRouter.post("/signup", async (req, res) => {
 
-   const validationOfInput = admimsignupSchema.safeParse(req.body);
-   if(!validationOfInput.success){
-      return res.status(403).json({
-         message:"validation failed",
-         errors:validationOfInput.error.errors
-      })
-   }
+  const validationOfInput = admimsignupSchema.safeParse(req.body);
+  if (!validationOfInput.success) {
+    return res.status(403).json({
+      message: "validation failed",
+      errors: validationOfInput.error.errors
+    })
+  }
   const { email, password, firstname, lastname } = validationOfInput.data;
-  
+
   try {
-     const hashedPassword = await bcrypt.hash(password ,10)
+    const hashedPassword = await bcrypt.hash(password, 10)
     await adminmodel.create({
       email,
-      password:hashedPassword,   
+      password: hashedPassword,
       firstname,
       lastname,
     });
 
     res.send("Successfully signed up");
   } catch (e) {
-    console.error(e); 
+    console.error(e);
     res.status(403).json({
       message: "Signup failed. Please check your input or try again later.",
-      error: e.message, 
+      error: e.message,
     });
   }
 });
@@ -60,13 +61,13 @@ adminRouter.post('/signin', async function (req, res) {
       return res.status(403).json({ message: "Invalid email or password" });
 
     }
-    const passwordValid = await bcrypt.compare(password,admin.password);
-    if(!passwordValid){
+    const passwordValid = await bcrypt.compare(password, admin.password);
+    if (!passwordValid) {
       return res.status(403).json({ message: "Invalid email or password" });
     }
 
-  
-    const token = jwt.sign({ id: admin._id }, jwt_secret);
+
+    const token = jwt.sign({ id: admin._id }, jwt_admin_secret);
 
     res.json({ token });
   } catch (err) {
@@ -76,10 +77,10 @@ adminRouter.post('/signin', async function (req, res) {
 });
 
 
-
+adminRouter.use(adminmiddleware);
 adminRouter.post("/createcourse", async function (req, res) {
-  const { title, description, price, imageUrl, creatorId } = req.body;
-
+  const { title, description, price, imageUrl } = req.body;
+  const creatorId = req.userId
   try {
     const course = await coursemodel.create({
       title,
@@ -133,7 +134,7 @@ adminRouter.delete("/deletecourse/:id", async function (req, res) {
 
   try {
     const deletedCourse = await coursemodel.findByIdAndDelete(id);
-   
+
     if (!deletedCourse) {
       return res.status(404).json({ message: "Course not found" });
     }
@@ -145,6 +146,6 @@ adminRouter.delete("/deletecourse/:id", async function (req, res) {
 
 
 
-module.exports={
-    adminRouter: adminRouter
+module.exports = {
+  adminRouter: adminRouter
 }

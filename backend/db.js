@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 
-mongoose.connect("mongodb+srv://admin:DhI636922@cluster0.6jvkxi7.mongodb.net/course_app")
+mongoose.connect(process.env.mongodb_URL)
 
 const Schema = mongoose.Schema;
 

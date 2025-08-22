@@ -1,10 +1,10 @@
 const { Router } = require('express');
 const userRouter = Router();
-const{usermodel} = require("../db")
+const { usermodel } = require("../db")
 const jwt = require('jsonwebtoken')
-const jwt_secret = "aadhi161022"
 const { z } = require('zod');
 const bcrypt = require("bcrypt")
+
 
 const signupSchema = z.object({
   email: z.string().email("Invalid email format"),
@@ -33,17 +33,17 @@ userRouter.post("/signup", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     await usermodel.create({
       email,
-      password:hashedPassword,   
+      password: hashedPassword,
       firstname,
       lastname,
     });
 
     res.send("Successfully signed up");
   } catch (e) {
-    console.error(e); 
+    console.error(e);
     res.status(403).json({
       message: "Signup failed. Please check your input or try again later.",
-      error: e.message, 
+      error: e.message,
     });
   }
 });
@@ -57,13 +57,13 @@ userRouter.post('/signin', async function (req, res) {
     if (!user) {
       return res.status(403).json({ message: "Invalid email or password" });
     }
-    const validpassword = await bcrypt.compare(password,user.password)
-    if(!validpassword){
+    const validpassword = await bcrypt.compare(password, user.password)
+    if (!validpassword) {
       return res.status(403).json({ message: "Invalid email or password" });
     }
 
-  
-    const token = jwt.sign({ id: user._id }, jwt_secret);
+
+    const token = jwt.sign({ id: user._id }, jwt_user_secret);
 
     res.json({ token });
   } catch (err) {
@@ -72,6 +72,6 @@ userRouter.post('/signin', async function (req, res) {
   }
 });
 
-module.exports={
-    userRouter: userRouter
+module.exports = {
+  userRouter: userRouter
 }
