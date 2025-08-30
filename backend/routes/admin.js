@@ -67,7 +67,7 @@ adminRouter.post('/signin', async function (req, res) {
     }
 
 
-    const token = jwt.sign({ id: admin._id }, jwt_admin_secret);
+    const token = jwt.sign({ id: admin._id }, process.env.JWT_ADMIN_SECRET);
 
     res.json({ token });
   } catch (err) {
@@ -99,12 +99,13 @@ adminRouter.post("/createcourse", async function (req, res) {
 
 adminRouter.get("/viewcourses", async function (req, res) {
   try {
-    const courses = await coursemodel.find({});
+    const courses = await coursemodel.find({ adminId: req.userId }); // filter by logged-in admin
     res.json({ courses });
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch courses", error: err.message });
   }
 });
+
 
 
 adminRouter.put("/modifycourse/:id", async function (req, res) {

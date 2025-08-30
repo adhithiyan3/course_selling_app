@@ -63,7 +63,7 @@ userRouter.post('/signin', async function (req, res) {
     }
 
 
-    const token = jwt.sign({ id: user._id }, jwt_user_secret);
+    const token = jwt.sign({ id: user._id }, process.env.JWT_USER_SECRET);
 
     res.json({ token });
   } catch (err) {
@@ -71,6 +71,18 @@ userRouter.post('/signin', async function (req, res) {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+userRouter.get("/profile", async (req, res) => {
+  const token = req.headers.token;
+  try {
+    const valid = jwt.verify(token, process.env.JWT_USER_SECRET);
+    const user = await usermodel.findById(valid.id).select("-password");
+    res.json({ user });
+  } catch (err) {
+    res.status(401).json({ message: "Invalid token" });
+  }
+});
+
 
 module.exports = {
   userRouter: userRouter

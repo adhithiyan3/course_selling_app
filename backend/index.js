@@ -4,6 +4,8 @@ const{adminRouter}=require("./routes/admin")
 const{userRouter}=require("./routes/user")
 const{courseRouter}=require("./routes/course")
 require('dotenv').config()
+const cors = require('cors');
+app.use(cors());
 
 app.use(express.json());
 app.use("/admin" , adminRouter)
